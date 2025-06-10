@@ -92,12 +92,7 @@ class MainViewController: UIViewController {
     /// `currentSong`이 존재하고 스트리밍 URL이 유효한 경우 AVPlayer로 재생을 시작합니다.
     /// 버튼 상태도 재생 중으로 갱신합니다.
     private func playCurrentSongIfAvailable() {
-        guard let song = currentSong,
-              let asset = NetworkManager.shared.createAssetWithHeaders(url: song.streamUrl) else {
-            return
-        }
-
-        PlayerManager.shared.play(asset: asset)
+        PlayerManager.shared.play()
         isPlaying = true
         updatePlayPauseButton()
     }
@@ -164,7 +159,7 @@ class MainViewController: UIViewController {
             PlayerManager.shared.resume()
         } else if let song = currentSong,
                   let asset = NetworkManager.shared.createAssetWithHeaders(url: song.streamUrl) {
-            PlayerManager.shared.play(asset: asset)
+            PlayerManager.shared.play()
         }
     }
 
@@ -215,5 +210,15 @@ class MainViewController: UIViewController {
         let seconds = totalSeconds % 60
 
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+
+    @IBAction func forward(_ sender: Any) {
+        PlayerManager.shared.nextTrack()
+    }
+
+
+    @IBAction func back(_ sender: Any) {
+        PlayerManager.shared.beforeTrack()
     }
 }

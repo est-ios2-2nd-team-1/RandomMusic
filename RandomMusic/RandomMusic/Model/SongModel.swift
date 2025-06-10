@@ -29,4 +29,14 @@ struct SongModel {
         self.streamUrl = response.streamUrl
         self.thumbnailData = thumbnailData
     }
+
+    init(title: String, album: String, artist: String, genre: String, id: Int, streamUrl: String, thumbnailData: Data? = nil) {
+        self.title = title
+        self.album = album
+        self.artist = artist
+        self.genre = genre
+        self.id = id
+        self.streamUrl = streamUrl
+        self.thumbnailData = thumbnailData
+    }
 }

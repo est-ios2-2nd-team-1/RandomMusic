@@ -7,6 +7,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let _ = (scene as? UIWindowScene) else { return }
 
+        PlayerManager.shared.setTrackList(DataManager.shared.fetchSongsOrderedByInsertedDate())
+
         let isFirstLaunch = !UserDefaults.standard.bool(forKey: "isOnboardingCompleted")
 
         if isFirstLaunch {

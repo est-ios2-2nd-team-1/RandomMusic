@@ -10,4 +10,8 @@ extension Song {
 
         return nil
     }
+
+    func toModel() -> SongModel {
+        SongModel(title: self.title!, album: self.album!, artist: self.artist!, genre: self.genre!, id: Int(exactly: self.id)!, streamUrl: self.streamUrl!, thumbnailData: Data())
+    }
 }

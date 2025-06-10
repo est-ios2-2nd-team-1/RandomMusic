@@ -94,6 +94,22 @@ final class DataManager {
         return []
     }
 
+    func fetchSongsOrderedByInsertedDate() -> [SongModel] {
+        let request: NSFetchRequest<Song> = Song.fetchRequest()
+
+        // insertedDate를 오름차순 정렬
+        let sortDescriptor = NSSortDescriptor(key: "insertDate", ascending: true)
+        request.sortDescriptors = [sortDescriptor]
+
+        do {
+            let songs = try mainContext.fetch(request)
+            return songs.map { $0.toModel() }
+        } catch {
+            print("Failed to fetch songs: \(error)")
+            return []
+        }
+    }
+
     /// Context에서 변경된 데이터를 영구적으로 저장합니다.
     func saveContext() {
         let context = persistentContainer.viewContext

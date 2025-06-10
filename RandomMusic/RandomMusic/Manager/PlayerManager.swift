@@ -7,6 +7,16 @@ import AVFoundation
 final class PlayerManager {
     static let shared = PlayerManager()
 
+    // 네트워크 호출을 PlayerManager에서 하고
+    // trackList 보관을 PlayerManager
+    // play, pause, 다음곡 재생, 이전곡 재생 -> PlayerManager.shared.play()
+
+    // MARK: - 변경점 Start
+    private(set) var trackList: [SongModel] = [] // 플레이리스트를 여기서 보관
+    private(set) var currentIndex: Int = 0 // 재생되고 있는 인덱스 보관
+    // MARK: - 변경점 End
+    private(set) var player: AVPlayer?
+
     /// 한 곡 반복 재생 여부를 설정합니다.
     var isRepeatEnabled = false
 
@@ -21,16 +31,14 @@ final class PlayerManager {
     /// 현재 재생 항목이 끝까지 재생되었을 때 호출되는 클로저입니다.
     var onPlaybackFinished: (() -> Void)?
 
-    private var player: AVPlayer?
+
     private var timeObserverToken: Any?
 
-    /// 지정된 AVURLAsset을 사용하여 오디오를 재생합니다.
-    ///
-    /// 이전 재생 상태는 모두 초기화되며,
-    /// AVPlayerItemDidPlayToEndTime 알림을 통해 재생 완료 이벤트를 수신합니다.
-    /// - Parameter asset: 재생할 AVURLAsset입니다.
-    func play(asset: AVURLAsset) {
-        let item = AVPlayerItem(asset: asset)
+    // MARK: - 변경점 Start
+    func play() {
+        // 네트워크를 여기서 직접 호출
+        let asset = NetworkManager.shared.createAssetWithHeaders(url: trackList[currentIndex].streamUrl)
+        let item = AVPlayerItem(asset: asset!)
         player = AVPlayer(playerItem: item)
 
         NotificationCenter.default.addObserver(
@@ -51,6 +59,39 @@ final class PlayerManager {
         addPeriodicTimeObserver()
         player?.play()
     }
+
+    /// 다음 곡 재생
+    func nextTrack() {
+        currentIndex += 1
+        Task {
+            do {
+                let songModel = try await NetworkManager.shared.getMusic()
+                DataManager.shared.insertSongData(from: songModel)
+                trackList.append(songModel)
+                play()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    /// 이전 곡 재생
+    func beforeTrack() {
+        currentIndex -= 1
+        play()
+    }
+
+    /// 플레이리스트 트랙 저장
+    func setTrackList(_ trackList: [SongModel]) {
+        self.trackList = trackList
+    }
+
+    /// 마지막으로 들었었던 트랙 인덱스 불러오기. (아마 UserDefaults로 저장해야 함.)
+    func setCurrentIndex(_ indexPath: IndexPath) {
+        self.currentIndex = indexPath.row
+    }
+
+    // MARK: - 변경점 End
 
     /// 현재 오디오 재생을 일시정지합니다.
     func pause() {
